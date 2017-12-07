@@ -16,17 +16,92 @@ namespace Demo
     {
         static void Main(string[] args)
         {
-            var usStatesGeojson = @"C:\Users\az185030\Downloads\cb_2016_us_state_500k\us_states.geojson";
-            var usZipCodesGeojson = @"C:\Users\az185030\Downloads\cb_2016_us_zcta510_500k_kml\geoJson.geojson";
-            var ro =
-                Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
-                    System.IO.File.ReadAllText(usStatesGeojson
-                        ), new DbGeographyConverter());
-            var sdflksdfs = System.Data.Spatial.DbGeography.MultiPolygonFromText("", 4326);
-            var slkjdflkjsdfjklslkjdf = System.Data.Spatial.DbGeography.PolygonFromText("", 4326);
-            sdflksdfs.Intersects(slkjdflkjsdfjklslkjdf);
+            var states = new List<StateZips>();
+            var textFileLines = System.IO.File.ReadAllLines(@"C:\Users\AbdulBeard\Downloads\zips_per_state.csv");
+            foreach (var line in textFileLines)
+            {
+                var state = new StateZips { Zips = new List<string>() };
+                var firstFive = line.Substring(0, 5);
+                state.Zips.Add(firstFive);
+                var firstThree = line.Substring(0, 3);
+                var charAtSixthPos = line.ElementAt(5);
+                var charArray = line.ToCharArray();
+                var rangeBeginning = 0;
+                var rangeEnd = 0;
+                var currentBuffer = new List<char>();
+                for (var i = 5; i < line.Length; i++)
+                {
+                    if (char.IsWhiteSpace(charArray[i]))
+                    {
+                        continue;
+                    }
+                    else if (charArray[i] == ',')
+                    {
+                        if (i == 5) continue;
+                        if (currentBuffer.Count == 2)
+                        {
+                            var sdf = firstThree + new String(currentBuffer.ToArray());
+                            state.Zips.Add(sdf.PadLeft(5, '0'));
+                            currentBuffer = new List<char>();
+                        }
+                    }
+                    else if (charArray[i] == '-')
+                    {
+                        rangeBeginning = currentBuffer.Count == 2 ?
+                            int.Parse(new string(new List<char> { firstThree[0], firstThree[1], firstThree[2], currentBuffer.ElementAt(0), currentBuffer.ElementAt(1) }.ToArray())) : 
+                            int.Parse(firstFive);
+                        rangeEnd = int.Parse(new string(new List<char> { firstThree[0], firstThree[1], firstThree[2], charArray[i + 1], charArray[i + 2] }.ToArray()));
+                        state.Zips.AddRange(getZipsForRange(rangeBeginning, rangeEnd));
+                        i += 2;
+                    }
+                    else if (char.IsLetter(charArray[i])) { break; }
+                    else if (char.IsNumber(charArray[i]))
+                    {
+                        currentBuffer.Add(charArray[i]);
+                    }
+                }
+                var commaSplit = line.Split(',');
+                var commaSplitSpaceSplit = commaSplit[commaSplit.Length - 1].Split(' ');
+                var stateCode = commaSplitSpaceSplit[commaSplitSpaceSplit.Length - 2];
+                var city = commaSplit[commaSplit.Length - 1].Split(stateCode.ToArray())[0];
+                state.City = city;
+                state.State = stateCode;
+                states.Add(state);
+            }
+        }
+
+        public static List<string> getZipsForRange(int x, int y)
+        {
+            var result = new List<string> { x.ToString().PadLeft(5, '0'), y.ToString().PadLeft(5, '0') };
+            x++;
+            while (x < y)
+            {
+                result.Add(x.ToString().PadLeft(5, '0'));
+                x++;
+            }
+            return result;
         }
     }
+
+    public class StateZips
+    {
+        public string State { get; set; }
+        public List<string> Zips { get; set; }
+        public string City { get; set; }
+    }
+
+    //static void Main(string[] args)
+    //{
+    //    var usStatesGeojson = @"C:\Users\az185030\Downloads\cb_2016_us_state_500k\us_states.geojson";
+    //    var usZipCodesGeojson = @"C:\Users\az185030\Downloads\cb_2016_us_zcta510_500k_kml\geoJson.geojson";
+    //    var ro =
+    //        Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
+    //            System.IO.File.ReadAllText(usStatesGeojson
+    //                ), new DbGeographyConverter());
+    //    var sdflksdfs = System.Data.Spatial.DbGeography.MultiPolygonFromText("", 4326);
+    //    var slkjdflkjsdfjklslkjdf = System.Data.Spatial.DbGeography.PolygonFromText("", 4326);
+    //    sdflksdfs.Intersects(slkjdflkjsdfjklslkjdf);
+    //}
 
     public class DbGeographyConverter : JsonConverter
     {

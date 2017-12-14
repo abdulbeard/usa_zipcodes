@@ -47,5 +47,11 @@
     <Compile Include="GeoJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Geojson\results.json" />
+    <None Include="Geojson\stateAbbreviations.csv" />
+    <None Include="Geojson\us_outline_geojson.geojson" />
+    <None Include="Geojson\us_regions_geojson.geojson" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

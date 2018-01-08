@@ -14,6 +14,48 @@ namespace Demo
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+            var logFile = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\logfile.txt";
+            var lines = System.IO.File.ReadAllLines(logFile);
+            var yolo = lines.Select(x => {
+                var splitResult = x.Split(':');
+                return new KeyValuePair<string, string>(splitResult[0], splitResult[1]);
+            }).GroupBy(x=>x.Key).ToDictionary(x=>x.Key, x=>x.Select(y=>y.Value).ToList());
+            System.IO.File.WriteAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\statesAndZips.json", Newtonsoft.Json.JsonConvert.SerializeObject(yolo));
+        }
+        //static void Main(string[] args)
+        //{
+        //    var logFile = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\logfile.txt";
+
+        //    var states = JsonConvert.DeserializeObject<Rootobject>(System.IO.File.ReadAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_states\us_states.geojson"), new DbGeographyConverter());
+        //    var zipCodes = JsonConvert.DeserializeObject<Rootobject>(System.IO.File.ReadAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\geoJson\geoJson.geojson"), new DbGeographyConverter());
+        //    var statesAndAbbreviations = getStateAndAbbrDict();
+        //    foreach(var state in states.features)
+        //    {
+        //        foreach(var zip in zipCodes.features)
+        //        {
+        //            if (zip.geometry.coordinates.Intersects(state.geometry.coordinates))
+        //            {
+        //                System.IO.File.AppendAllText(logFile, $"{state.properties.Name}=>{zip.properties.ZCTA5CE10}{Environment.NewLine}");
+        //            }
+        //        }
+        //    }
+        //    System.IO.File.AppendAllText(logFile, "All done baby!");
+        //}
+
+        static Dictionary<string, string> getStateAndAbbrDict()
+        {
+            var dictStateFullNameToAbbr = new Dictionary<string, string>();
+            var lines = System.IO.File.ReadLines(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\stateAbbreviations.csv");
+            foreach (var line in lines)
+            {
+                var lineSplit = line.Split(',');
+                dictStateFullNameToAbbr.Add(lineSplit[0], lineSplit[1]);
+            }
+            return dictStateFullNameToAbbr;
+        }
+
         //static void Main(string[] args)
         //{
         //    var states = new List<StateZips>();
@@ -79,77 +121,77 @@ namespace Demo
         //    var dupe = allZips.GroupBy(x => x).Where(y => y.Count() > 1).Select(z=>z);
         //}
 
-        static void Main(string[] args)
-        {
-            var dictStateFullNameToAbbr = new Dictionary<string, string>();
-            var lines = System.IO.File.ReadLines(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\stateAbbreviations.csv");
-            foreach (var line in lines)
-            {
-                var lineSplit = line.Split(',');
-                dictStateFullNameToAbbr.Add(lineSplit[0], lineSplit[1]);
-            }
+        //static void Main(string[] args)
+        //{
+        //    var dictStateFullNameToAbbr = new Dictionary<string, string>();
+        //    var lines = System.IO.File.ReadLines(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\stateAbbreviations.csv");
+        //    foreach (var line in lines)
+        //    {
+        //        var lineSplit = line.Split(',');
+        //        dictStateFullNameToAbbr.Add(lineSplit[0], lineSplit[1]);
+        //    }
 
-            var regionsAndStates = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(
-                System.IO.File.ReadAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\results.json"));
-            foreach (var state in regionsAndStates)
-            {
-                for (int i = 0; i < state.Value.Count; i++)
-                {
-                    var stateFullName = state.Value.ElementAt(i);
-                    state.Value[i] = dictStateFullNameToAbbr[stateFullName];
-                }
-            }
-
-
+        //    var regionsAndStates = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(
+        //        System.IO.File.ReadAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\results.json"));
+        //    foreach (var state in regionsAndStates)
+        //    {
+        //        for (int i = 0; i < state.Value.Count; i++)
+        //        {
+        //            var stateFullName = state.Value.ElementAt(i);
+        //            state.Value[i] = dictStateFullNameToAbbr[stateFullName];
+        //        }
+        //    }
 
 
 
 
 
 
-            var usStatesGeojson = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_states\us_states.geojson";
-            var usZipCodesGeojson = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\geoJson\geoJson.geojson";
-            var usregions = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_regions_geojson.geojson";
-            var us = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_outline_geojson.geojson";
 
-            var results = new Dictionary<string, List<string>>();
 
-            var usOutline = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
-                    System.IO.File.ReadAllText(us
-                        ), new DbGeographyConverter());
-            var usRegions = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
-                    System.IO.File.ReadAllText(usregions
-                        ), new DbGeographyConverter());
-            var usStates = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
-                    System.IO.File.ReadAllText(usStatesGeojson
-                        ), new DbGeographyConverter());
+        //    var usStatesGeojson = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_states\us_states.geojson";
+        //    var usZipCodesGeojson = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\geoJson\geoJson.geojson";
+        //    var usregions = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_regions_geojson.geojson";
+        //    var us = @"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\us_outline_geojson.geojson";
 
-            foreach (var region in usRegions.features)
-            {
-                results.Add(region.properties.Name, new List<string>());
-            }
+        //    var results = new Dictionary<string, List<string>>();
 
-            foreach (var state in usStates.features)
-            {
-                foreach (var region in usRegions.features)
-                {
-                    if (state.geometry.coordinates.Intersects(region.geometry.coordinates))
-                    {
-                        results[region.properties.Name].Add(state.properties.Name);
-                    }
-                }
-            }
+        //    var usOutline = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
+        //            System.IO.File.ReadAllText(us
+        //                ), new DbGeographyConverter());
+        //    var usRegions = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
+        //            System.IO.File.ReadAllText(usregions
+        //                ), new DbGeographyConverter());
+        //    var usStates = Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
+        //            System.IO.File.ReadAllText(usStatesGeojson
+        //                ), new DbGeographyConverter());
 
-            System.IO.File.WriteAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\results.json", JsonConvert.SerializeObject(results));
+        //    foreach (var region in usRegions.features)
+        //    {
+        //        results.Add(region.properties.Name, new List<string>());
+        //    }
 
-            var ro =
-                Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
-                    System.IO.File.ReadAllText(usZipCodesGeojson
-                        ), new DbGeographyConverter());
-            var sdflksdfs = System.Data.Spatial.DbGeography.MultiPolygonFromText("", 4326);
-            var slkjdflkjsdfjklslkjdf = System.Data.Spatial.DbGeography.PolygonFromText("", 4326);
-            sdflksdfs.Intersects(slkjdflkjsdfjklslkjdf);
-        }
+        //    foreach (var state in usStates.features)
+        //    {
+        //        foreach (var region in usRegions.features)
+        //        {
+        //            if (state.geometry.coordinates.Intersects(region.geometry.coordinates))
+        //            {
+        //                results[region.properties.Name].Add(state.properties.Name);
+        //            }
+        //        }
+        //    }
+
+        //    System.IO.File.WriteAllText(@"C:\Development\Github\usa_zipcodes\USA_ZipCodes\Geojson\results.json", JsonConvert.SerializeObject(results));
+
+        //    var ro =
+        //        Newtonsoft.Json.JsonConvert.DeserializeObject<Rootobject>(
+        //            System.IO.File.ReadAllText(usZipCodesGeojson
+        //                ), new DbGeographyConverter());
+        //    var sdflksdfs = System.Data.Spatial.DbGeography.MultiPolygonFromText("", 4326);
+        //    var slkjdflkjsdfjklslkjdf = System.Data.Spatial.DbGeography.PolygonFromText("", 4326);
+        //    sdflksdfs.Intersects(slkjdflkjsdfjklslkjdf);
+        //}
 
         public static List<string> getZipsForRange(int x, int y)
         {
